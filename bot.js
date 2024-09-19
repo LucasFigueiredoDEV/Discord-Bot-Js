@@ -14,12 +14,12 @@ const client = new Client({
     ]
 });
 
-const token = process.env.TOKEN;
 const prefix = '!';
 
+// command list
 const commandList = [
     'hello',
-    'ping'
+    'ping',
 ];
 
 client.on('ready', () => {
@@ -42,24 +42,37 @@ client.on('messageCreate', async (message) => {
         console.log(`[${Date.now()}] - ${message.author.username}: ${message.content}`)
         return;
     };
-
-    const commands = commandList.includes(message.content.slice(1));
-    var command = message.content.slice(1);
+ 
+    // Verify if message content have in command list
+    var command = '';
+    for (let i = 0; i <= commandList.length - 1; i++){
+        var size = commandList[i].length;
+        // repair a function to verify command
+        if (commandList.includes(message.content.slice(1, size+1))){
+            command = message.content.slice(1, size+1);
+        }
+    }
+    const commands = commandList.includes(command);
+    console.log(command);
     
     console.log(`[${Date.now()}] - ${message.author.username}: ${message.content}`);
 
-
     if (commands) {
+        // switch case to return a reponse of a command request existent in command list
         switch (command) {
             case "hello":
                 await message.reply({content: 'hello world'})
                 break;
             case "ping":
-                await message.reply()
+                const response = await message.channel.send('Ping?');
+                response.edit(`Pong! A latência é de ${response.createdTimestamp - message.createdTimestamp}ms. A latência da API é de ${Math.round(client.ws.ping)}`)
+                break;       
         }
     } else {
         await message.reply({content: 'Comando desconhecido pelo bot'});
     }
 });
+
+const token = process.env.TOKEN;
 
 client.login(token);
